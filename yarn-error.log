@@ -1,0 +1,42 @@
+Arguments: 
+  /Users/zim/.nvm/versions/node/v14.17.1/bin/node /Users/zim/.yarn/bin/yarn.js add puppeterr
+
+PATH: 
+  /Users/zim/.yarn/bin:/Users/zim/.config/yarn/global/node_modules/.bin:/Users/zim/.nvm/versions/node/v14.17.1/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/zim/.yarn/bin
+
+Yarn version: 
+  1.22.15
+
+Node version: 
+  14.17.1
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/puppeterr: Not found
+      at Request.params.callback [as _callback] (/Users/zim/.yarn/lib/cli.js:67031:18)
+      at Request.self.callback (/Users/zim/.yarn/lib/cli.js:140885:22)
+      at Request.emit (events.js:375:28)
+      at Request.<anonymous> (/Users/zim/.yarn/lib/cli.js:141857:10)
+      at Request.emit (events.js:375:28)
+      at IncomingMessage.<anonymous> (/Users/zim/.yarn/lib/cli.js:141779:12)
+      at Object.onceWrapper (events.js:481:28)
+      at IncomingMessage.emit (events.js:387:35)
+      at endReadableNT (internal/streams/readable.js:1317:12)
+      at processTicksAndRejections (internal/process/task_queues.js:82:21)
+
+npm manifest: 
+  {
+    "name": "auto-reg",
+    "version": "1.0.0",
+    "main": "index.js",
+    "author": "Dat Codero",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
