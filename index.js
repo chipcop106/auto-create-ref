@@ -34,13 +34,20 @@ function randomEmailName(length) {
 }
 
 const fetchEmailInboxLink = async (email, page) => {
-  const resEmail = await axios.get(`/addresses/${email}/messages`);
-  const {data} = resEmail;
-  if(data.length > 0){
-    await page.goto(data[0].links[0])
-  }else{
-    await fetchEmailInboxLink(email, page);
-  }
+  return new Promise(resolve => {
+    const interval = setInterval(async () => {
+      const resEmail = await axios.get(`/addresses/${email}/messages`);
+      const {data} = resEmail;
+      if(data.length > 0){
+        clearInterval(interval);
+        await page.goto(data[0].links[0]);
+        resolve(true);
+      }else{
+        console.log("Đang chờ lấy link inbox email....")
+      }
+    }, 2000);
+  })
+
 }
 
 const checkAccountBalance = async () => {
@@ -71,24 +78,28 @@ const generatePhoneNumber = async () => {
 }
 
 const getOTPCode = async (id,page) => {
-  const response = await axios.get(`https://chothuesimcode.com/api?act=code&apik=${smsKey}&id=${id}`);
-  const {ResponseCode, Result} = response.data;
-  const timeout = setTimeout(() => {
-      if(ResponseCode !== 0){
-        return false;
+  return new Promise((resolve) => {
+    const interval = setInterval(async () => {
+      const response = await axios.get(`https://chothuesimcode.com/api?act=code&apik=${smsKey}&id=${id}`);
+      const {ResponseCode, Result} = response.data;
+      const timeout = setTimeout(() => {
+        if(ResponseCode !== 0){
+          // Nếu hết timeout 10s vẫn chưa lấy đc OTP thì trả false luôn
+          clearInterval(interval);
+          clearTimeout(timeout);
+          resolve(false);
+        }
+      }, [10000]);
+      if(ResponseCode === 0){
+        clearTimeout(timeout);
+        clearInterval(interval);
+        console.log("Mã OTP của bạn là: ", Result.Code);
+        resolve(Result.Code);
       }
-  }, [10000])
-  if(ResponseCode === 0){
-    clearTimeout(timeout);
-    console.log("Mã OTP của bạn là: ", Result.Code);
-    const otp = Result.Code + "";
-    for(let i = 0; i < otp.length; i++){
-      await page.type(`input.text-center.border.border-black-400.rounded-lg.mr-4.mb-12.Field_input_code__3sbAX:nth-child(${i + 1})`, otp[i]);
-    }
-    return Result.Code;
-  }else{
-    await getOTPCode(id, page);
-  }
+    }, 2000);
+
+  })
+
 }
 
 const createAccount = async () => {
@@ -128,7 +139,15 @@ const createAccount = async () => {
   }
   await page.type("input[name='phone']", `0${phoneNumber}`);
   await page.click("button.font-bold.w-full.Button_secondary__3P0Bv.Button_button--common__2L02v");
-  await getOTPCode(id, page);
+  const otp = await getOTPCode(id, page);
+  if(!otp){
+    await browser.close();
+    return;
+  }
+  const otpStr = otp + "";
+  for(let i = 0; i < otpStr.length; i++){
+    await page.type(`input.text-center.border.border-black-400.rounded-lg.mr-4.mb-12.Field_input_code__3sbAX:nth-child(${i + 1})`, otpStr[i]);
+  }
   await page.waitForSelector("button.font-bold.w-full.mb-12.Button_secondary__3P0Bv.Button_button--common__2L02v");
   await page.click("button.font-bold.w-full.mb-12.Button_secondary__3P0Bv.Button_button--common__2L02v");
   await page.waitForSelector(".mx-auto.styles_position_modal__1fjeV.styles_background__ZTri1");
@@ -140,10 +159,6 @@ const createAccount = async () => {
   while(canContinue) {
     try{
       await Promise.all([
-        createAccount(),
-        createAccount(),
-        createAccount(),
-        createAccount(),
         createAccount(),
       ]);
       await sleep(5000);
